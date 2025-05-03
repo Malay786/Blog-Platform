@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { addComment, deleteComment, updateComment } from "../controllers/commentController.js";
 import { ProtectedRoute } from "../middlewares/authMiddleware.js";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 
 const router = Router();
 

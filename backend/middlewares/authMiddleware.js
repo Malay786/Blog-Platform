@@ -43,11 +43,12 @@ export const ProtectedRoute = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // Find user (use .select('-password') to exclude sensitive fields)
-      req.user = await User.findById(decoded.id).select('-password'); // or decoded._id? Check your JWT payload!
+      const user = await User.findById(decoded.id).select('-password'); // or decoded._id? Check your JWT payload!
 
-      if (!req.user) {
+      if (!user) {
         return res.status(401).json({ message: "User not found" });
       }
+      req.user = user;  // attach user to request
 
       next();
     } catch (error) {

@@ -87,8 +87,21 @@ export const deletePost = async(req, res) => {
   try {
     const {id} = req.params;
     if(!req.user?._id) return res.status(401).json({success:false, message: "Unauthorized"})
-    const post = await Post.findOneAndDelete({user: req.user._id, _id: id});
+
+    //1. Find the post
+    const post = await Post.findById({user: req.user._id, _id: id});
     if(!post) return res.status(404).json({success: false, message: "Post not found"})
+
+    //2. check if the user is either the author or an admin
+    const isAuthor = post.user.toString() === req.user._id;
+    const isAdmin = req.user.role === "admin";
+
+    if(!isAuthor && !isAdmin) {
+      return res.status(403).json({message: "Unauthorized: You cannot delete this post"});
+    }
+
+    // delete the post
+    await post.deleteOne();
 
     return res.status(200).json({success: true, message: "Post deleted successfully"});
   } catch (error) {

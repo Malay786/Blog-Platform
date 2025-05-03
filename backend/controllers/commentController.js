@@ -35,8 +35,15 @@ export const deleteComment = async (req, res) => {
     const comment = await Comment.findById(commentId);
     if (!comment) return res.status(404).json({ message: "Comment not found" });
 
+    const post = await Post.findById(comment.post);
+    if(!post) return res.status(404).json({message: "Post not found"})
+
     //step2: Check authorization (only comment owner or admin can delete)
-    if (comment.user.toString() !== req.user.id && req.user.role !== "admin") {
+    const isCommentAuthor = comment.user.toString() === req.user.id;
+    const isPostOwner = post.user.toString() === req.user.id;
+    const isAdmin = req.user.role = "admin";
+    
+    if (!isCommentAuthor && !isPostOwner && !isAdmin) {
       return res.status(403).json({ success: false, message: "Unauthorized" });
     }
 
